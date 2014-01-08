@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileSplit;
@@ -17,7 +19,15 @@ import com.csc.test.vehicle.parsers.AccelParser;
 
 public class VehicleTestMapper extends MapReduceBase implements Mapper<LongWritable, Text, TimeseriesKey, AccelParser> {
 	
-	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss:SSS";
+	static Log log = LogFactory.getLog(VehicleTestMapper.class);
+			
+	static enum PointCounters {
+		POINTS_SEEN, POINTS_ADDED_TO_WINDOWS, MOVING_AVERAGES_CALCD
+	};
+	
+	//private static final String DATE_FORMAT = "M/d/yyyy";
+	
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"; //yyyy-MM-dd HH:mm:ss:SSS
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 	
@@ -32,8 +42,11 @@ public class VehicleTestMapper extends MapReduceBase implements Mapper<LongWrita
 			
 		String tripId, eventTime, accelData1, accelData2, accelData3;
 					
+		log.info("String read from file: "+values.toString());
 		StringTokenizer token = new StringTokenizer(values.toString(), ",");
 		while(token.hasMoreTokens()){
+			
+			reporter.incrCounter(PointCounters.POINTS_SEEN, 1);
 			
 			tripId = token.nextToken();
 			eventTime = token.nextToken();
@@ -47,7 +60,6 @@ public class VehicleTestMapper extends MapReduceBase implements Mapper<LongWrita
 				mapKey.set(tripId, sdf.parse(eventTime).getTime());
 				mapVal.setEventTime(sdf.parse(eventTime).getTime());
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			mapVal.setAccelData1Min(accelData1);

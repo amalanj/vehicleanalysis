@@ -14,8 +14,14 @@ import org.apache.hadoop.mapred.Reporter;
 import com.csc.test.vehicle.parsers.AccelParser;
 
 public class VehicleTestReducer extends MapReduceBase implements Reducer<TimeseriesKey, AccelParser, Text, Text> {
+	
+	static enum PointCounters {
+		POINTS_SEEN, POINTS_ADDED_TO_WINDOWS, MOVING_AVERAGES_CALCD
+	};
 
 	static long sec_in_ms = 1000;
+	
+	//static long days_in_ms = 1000*60*60*24;
 
 	private JobConf configuration;
 
@@ -32,30 +38,29 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 			
 		AccelParser result = new AccelParser();
 		AccelParser next_point = new AccelParser(); 
-		result.setAccelData1Min(null);
-		result.setAccelData1Max(null);
-		result.setAccelData2Min(null);
-		result.setAccelData2Max(null);
-		result.setAccelData3Min(null);
-		result.setAccelData3Max(null);
-		
-		int iWindowSizeInSec = this.configuration.getInt(
-				"tv.floe.caduceus.hadoop.movingaverage.windowSize", 5);
-		float iWindowStepSizeInSec = this.configuration.getFloat(
-				"tv.floe.caduceus.hadoop.movingaverage.windowStepSize", 0.5f);
+				
+		int iWindowSizeInSec = 20;
+		int iWindowStepSizeInSec = 1;
 
 		long iWindowSizeInMS = iWindowSizeInSec * sec_in_ms;
-		long iWindowStepSizeInMS = (long) (iWindowStepSizeInSec * sec_in_ms);
+		long iWindowStepSizeInMS = iWindowStepSizeInSec * sec_in_ms;
+		
+		//long iWindowSizeInMS = iWindowSizeInSec * days_in_ms;
+		//long iWindowStepSizeInMS = iWindowStepSizeInSec * days_in_ms;
 
 		Text out_key = new Text();
 		Text out_val = new Text();
 
 		SlidingWindow sliding_window = new SlidingWindow(iWindowSizeInMS,
 				iWindowStepSizeInMS, sec_in_ms);
+		/*SlidingWindow sliding_window = new SlidingWindow(iWindowSizeInMS,
+				iWindowStepSizeInMS, days_in_ms);*/
 
 		while (values.hasNext()) {
 			
 			while (sliding_window.WindowIsFull() == false && values.hasNext()) {
+				
+				reporter.incrCounter(PointCounters.POINTS_ADDED_TO_WINDOWS, 1);
 
 				next_point = values.next();
 
@@ -70,6 +75,8 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 				
 			}
 			if (sliding_window.WindowIsFull()) {
+				
+				reporter.incrCounter(PointCounters.MOVING_AVERAGES_CALCD, 1);
 
 				LinkedList<AccelParser> oWindow = sliding_window
 						.GetCurrentWindow();
@@ -79,8 +86,8 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 				// ---------- compute the moving average here -----------
 
 				out_key.set("Trip_Id: " + key.getTripId() + ", Date: "
-						+ strBackDate);
-
+						+ strBackDate + ", oWindow Size: "+oWindow.size());
+				
 				for (int x = 0; x < oWindow.size(); x++) {
 					
 					AccelParser parse = oWindow.get(x);
@@ -126,6 +133,13 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 
 				// 2. step window forward
 
+				result.setAccelData1Min(null);
+				result.setAccelData1Max(null);
+				result.setAccelData2Min(null);
+				result.setAccelData2Max(null);
+				result.setAccelData3Min(null);
+				result.setAccelData3Max(null);
+				
 				sliding_window.SlideWindowForward();
 
 			}

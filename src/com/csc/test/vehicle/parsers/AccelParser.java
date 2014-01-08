@@ -10,19 +10,15 @@ import org.apache.hadoop.io.Writable;
 
 public class AccelParser implements Writable, Comparable<AccelParser>{
 	
-	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss:SSS";
+	//private static final String DATE_FORMAT = "M/d/yyyy";
+	
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"; //yyyy-MM-dd HH:mm:ss:SSS
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
 	private String tripId;
 
 	private long eventTime;
-	
-	private String accelData1;
-	
-	private String accelData2;
-	
-	private String accelData3;
 
 	private String accelData1Min;
 
@@ -99,30 +95,6 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 	public void setAccelData3Max(String accelData3Max) {
 		this.accelData3Max = accelData3Max;
 	}
-
-	public String getAccelData1() {
-		return accelData1;
-	}
-
-	public String getAccelData2() {
-		return accelData2;
-	}
-
-	public String getAccelData3() {
-		return accelData3;
-	}
-
-	public void setAccelData1(String accelData1) {
-		this.accelData1 = accelData1;
-	}
-
-	public void setAccelData2(String accelData2) {
-		this.accelData2 = accelData2;
-	}
-
-	public void setAccelData3(String accelData3) {
-		this.accelData3 = accelData3;
-	}
 	
 	@Override
 	public void readFields(DataInput in) throws IOException {
@@ -137,6 +109,24 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 		this.accelData3Max = in.readUTF();
 		
 	}
+	
+	/**
+	 * This is a static method that deserializes a point from the underlying
+	 * binary representation.
+	 * 
+	 * @param in
+	 *            A DataInput object that represents the underlying stream to
+	 *            read from.
+	 * @return A AccelParser
+	 * @throws IOException
+	 */
+	public static AccelParser read(DataInput in) throws IOException {
+
+		AccelParser p = new AccelParser();
+		p.readFields(in);
+		return p;
+
+	}	
 
 	@Override
 	public void write(DataOutput out) throws IOException {
@@ -168,10 +158,11 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 
 		this.accelData1Min = source.accelData1Min;
 		this.accelData1Max = source.accelData1Max;
-		this.accelData1Min = source.accelData1Min;
-		this.accelData1Max = source.accelData1Max;
+		this.accelData2Min = source.accelData2Min;
+		this.accelData2Max = source.accelData2Max;
 		this.accelData3Min = source.accelData3Min;
 		this.accelData3Max = source.accelData3Max;
+		this.eventTime = source.eventTime;		
 
 	}
 

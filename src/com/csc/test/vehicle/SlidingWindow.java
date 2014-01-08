@@ -2,10 +2,15 @@ package com.csc.test.vehicle;
 
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.csc.test.vehicle.parsers.AccelParser;
 
 public class SlidingWindow {
 
+	
+	static Log log = LogFactory.getLog(VehicleTestMapper.class);
 	
 	LinkedList<AccelParser> oCurrentWindow; // = new LinkedList<Integer>();
 	
@@ -37,6 +42,9 @@ public class SlidingWindow {
 	
 	
 	public boolean WindowIsFull() {
+		
+		log.info("WindowDelta: "+this.GetWindowDelta()+" && WindowSize: "+this._lWindowSize);
+		System.out.println("WindowDelta: "+this.GetWindowDelta()+" && WindowSize: "+this._lWindowSize);
 		
 		if ( this.GetWindowDelta() >= this._lWindowSize ) {
 			return true;
