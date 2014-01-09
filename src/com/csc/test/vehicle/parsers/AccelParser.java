@@ -20,17 +20,26 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 
 	private long eventTime;
 
-	private String accelData1Min;
+	private Integer accelData1Min;
 
-	private String accelData1Max;
+	private Integer accelData1Max;
 
-	private String accelData2Min;
+	private Integer accelData2Min;
 
-	private String accelData2Max;
+	private Integer accelData2Max;
 
-	private String accelData3Min;
+	private Integer accelData3Min;
 
-	private String accelData3Max;
+	private Integer accelData3Max;
+
+	
+	public static String getDateFormat() {
+		return DATE_FORMAT;
+	}
+
+	public static SimpleDateFormat getSdf() {
+		return sdf;
+	}
 
 	public String getTripId() {
 		return tripId;
@@ -40,28 +49,32 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 		return eventTime;
 	}
 
-	public String getAccelData1Min() {
+	public Integer getAccelData1Min() {
 		return accelData1Min;
 	}
 
-	public String getAccelData1Max() {
+	public Integer getAccelData1Max() {
 		return accelData1Max;
 	}
 
-	public String getAccelData2Min() {
+	public Integer getAccelData2Min() {
 		return accelData2Min;
 	}
 
-	public String getAccelData2Max() {
+	public Integer getAccelData2Max() {
 		return accelData2Max;
 	}
 
-	public String getAccelData3Min() {
+	public Integer getAccelData3Min() {
 		return accelData3Min;
 	}
 
-	public String getAccelData3Max() {
+	public Integer getAccelData3Max() {
 		return accelData3Max;
+	}
+
+	public static void setSdf(SimpleDateFormat sdf) {
+		AccelParser.sdf = sdf;
 	}
 
 	public void setTripId(String tripId) {
@@ -72,41 +85,41 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 		this.eventTime = eventTime;
 	}
 
-	public void setAccelData1Min(String accelData1Min) {
+	public void setAccelData1Min(Integer accelData1Min) {
 		this.accelData1Min = accelData1Min;
 	}
 
-	public void setAccelData1Max(String accelData1Max) {
+	public void setAccelData1Max(Integer accelData1Max) {
 		this.accelData1Max = accelData1Max;
 	}
 
-	public void setAccelData2Min(String accelData2Min) {
+	public void setAccelData2Min(Integer accelData2Min) {
 		this.accelData2Min = accelData2Min;
 	}
 
-	public void setAccelData2Max(String accelData2Max) {
+	public void setAccelData2Max(Integer accelData2Max) {
 		this.accelData2Max = accelData2Max;
 	}
 
-	public void setAccelData3Min(String accelData3Min) {
+	public void setAccelData3Min(Integer accelData3Min) {
 		this.accelData3Min = accelData3Min;
 	}
 
-	public void setAccelData3Max(String accelData3Max) {
+	public void setAccelData3Max(Integer accelData3Max) {
 		this.accelData3Max = accelData3Max;
 	}
-	
+
 	@Override
 	public void readFields(DataInput in) throws IOException {
 		
 		//this.tripId = in.readUTF();
 		this.eventTime = in.readLong();
-		this.accelData1Min = in.readUTF();
-		this.accelData1Max = in.readUTF();
-		this.accelData2Min = in.readUTF();
-		this.accelData2Max = in.readUTF();
-		this.accelData3Min = in.readUTF();
-		this.accelData3Max = in.readUTF();
+		this.accelData1Min = in.readInt();
+		this.accelData1Max = in.readInt();
+		this.accelData2Min = in.readInt();
+		this.accelData2Max = in.readInt();
+		this.accelData3Min = in.readInt();
+		this.accelData3Max = in.readInt();
 		
 	}
 	
@@ -131,14 +144,14 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 	@Override
 	public void write(DataOutput out) throws IOException {
 		
-		//out.writeUTF(this.tripId);
+		//out.writeInt(this.tripId);
 		out.writeLong(this.eventTime);
-		out.writeUTF(this.accelData1Min);
-		out.writeUTF(this.accelData1Max);
-		out.writeUTF(this.accelData2Min);
-		out.writeUTF(this.accelData2Max);
-		out.writeUTF(this.accelData3Min);
-		out.writeUTF(this.accelData3Max);
+		out.writeInt(this.accelData1Min);
+		out.writeInt(this.accelData1Max);
+		out.writeInt(this.accelData2Min);
+		out.writeInt(this.accelData2Max);
+		out.writeInt(this.accelData3Min);
+		out.writeInt(this.accelData3Max);
 		
 	}
 

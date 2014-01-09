@@ -36,7 +36,9 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 	public void reduce(TimeseriesKey key, Iterator<AccelParser> values,
 			OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
-		AccelParser result = new AccelParser();
+		float point_sum = 0;
+		float moving_avg = 0;
+				
 		AccelParser next_point = new AccelParser(); 
 				
 		int iWindowSizeInSec = 20;
@@ -78,6 +80,10 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 				
 				reporter.incrCounter(PointCounters.MOVING_AVERAGES_CALCD, 1);
 
+				String reduceOut = new String();
+				
+				AccelParser result = new AccelParser();
+						
 				LinkedList<AccelParser> oWindow = sliding_window
 						.GetCurrentWindow();
 
@@ -88,57 +94,60 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 				out_key.set("Trip_Id: " + key.getTripId() + ", Date: "
 						+ strBackDate + ", oWindow Size: "+oWindow.size());
 				
-				for (int x = 0; x < oWindow.size(); x++) {
-					
-					AccelParser parse = oWindow.get(x);
-					
-					if(result.getAccelData1Min() == null || 
-							parse.getAccelData1Min().compareTo(result.getAccelData1Min()) < 0) {
-		                result.setAccelData1Min(parse.getAccelData1Min());
-		            } if(result.getAccelData1Max() == null || 
-							parse.getAccelData1Max().compareTo(result.getAccelData1Max()) > 0) {
-		                result.setAccelData1Max(parse.getAccelData1Max());
-		            }
-		            
-		            if(result.getAccelData2Min() == null || 
-							parse.getAccelData2Min().compareTo(result.getAccelData2Min()) < 0) {
-		                result.setAccelData2Min(parse.getAccelData2Min());
-		            } if(result.getAccelData2Max() == null || 
-							parse.getAccelData2Max().compareTo(result.getAccelData2Max()) > 0) {
-		                result.setAccelData2Max(parse.getAccelData2Max());
-		            }
-		            
-		            if(result.getAccelData3Min() == null || 
-							parse.getAccelData3Min().compareTo(result.getAccelData3Min()) < 0) {
-		                result.setAccelData3Min(parse.getAccelData3Min());
-		            } if(result.getAccelData3Max() == null || 
-							parse.getAccelData3Max().compareTo(result.getAccelData3Max()) > 0) {
-		                result.setAccelData3Max(parse.getAccelData3Max());
-		            }
-					
-
-					//point_sum += oWindow.get(x).fValue;
-
-				} // for
-
-				//moving_avg = point_sum / oWindow.size();
-
-				// out_val.set("Moving Average: " + moving_avg);
-
-				String reduceOut = result.getAccelData1Min() + ", "+ result.getAccelData1Max() + ", " + result.getAccelData2Min()
-						+ ", " + result.getAccelData2Max() + ", "+ result.getAccelData3Min() + ", " + result.getAccelData3Max();
-				out_val.set(reduceOut);
-				
-				output.collect(out_key, out_val);
-
-				// 2. step window forward
-
+				point_sum = 0;
+			
 				result.setAccelData1Min(null);
 				result.setAccelData1Max(null);
 				result.setAccelData2Min(null);
 				result.setAccelData2Max(null);
 				result.setAccelData3Min(null);
 				result.setAccelData3Max(null);
+				
+				for (int x = 0; x < oWindow.size(); x++) {
+					
+					//parse = oWindow.get(x);
+					
+					if(result.getAccelData1Min() == null || 
+							oWindow.get(x).getAccelData1Min().compareTo(result.getAccelData1Min()) < 0) {
+		                result.setAccelData1Min(oWindow.get(x).getAccelData1Min());
+		            } if(result.getAccelData1Max() == null || 
+		            		oWindow.get(x).getAccelData1Max().compareTo(result.getAccelData1Max()) > 0) {
+		                result.setAccelData1Max(oWindow.get(x).getAccelData1Max());
+		            }
+		            
+		            if(result.getAccelData2Min() == null || 
+		            		oWindow.get(x).getAccelData2Min().compareTo(result.getAccelData2Min()) < 0) {
+		                result.setAccelData2Min(oWindow.get(x).getAccelData2Min());
+		            } if(result.getAccelData2Max() == null || 
+		            		oWindow.get(x).getAccelData2Max().compareTo(result.getAccelData2Max()) > 0) {
+		                result.setAccelData2Max(oWindow.get(x).getAccelData2Max());
+		            }
+		            
+		            if(result.getAccelData3Min() == null || 
+		            		oWindow.get(x).getAccelData3Min().compareTo(result.getAccelData3Min()) < 0) {
+		                result.setAccelData3Min(oWindow.get(x).getAccelData3Min());
+		            } if(result.getAccelData3Max() == null || 
+		            		oWindow.get(x).getAccelData3Max().compareTo(result.getAccelData3Max()) > 0) {
+		                result.setAccelData3Max(oWindow.get(x).getAccelData3Max());
+		            }
+					
+		            //reduceOut = reduceOut.concat(oWindow.get(x).getAccelData1Min()+":");
+
+					//point_sum += Integer.parseInt(oWindow.get(x).getAccelData1Min());
+
+				} // for
+
+				//moving_avg = point_sum / oWindow.size();
+
+				//out_val.set("AccelData1Min Moving Average: " + moving_avg);
+
+				reduceOut = result.getAccelData1Min() + ", "+ result.getAccelData1Max() + ", " + result.getAccelData2Min()
+						+ ", " + result.getAccelData2Max() + ", "+ result.getAccelData3Min() + ", " + result.getAccelData3Max();
+				out_val.set(reduceOut);
+				
+				output.collect(out_key, out_val);
+
+				// 2. step window forward
 				
 				sliding_window.SlideWindowForward();
 

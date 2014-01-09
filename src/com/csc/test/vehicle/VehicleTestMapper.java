@@ -62,12 +62,12 @@ public class VehicleTestMapper extends MapReduceBase implements Mapper<LongWrita
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-			mapVal.setAccelData1Min(accelData1);
-			mapVal.setAccelData1Max(accelData1);
-			mapVal.setAccelData2Min(accelData2);
-			mapVal.setAccelData2Max(accelData2);
-			mapVal.setAccelData3Min(accelData3);
-			mapVal.setAccelData3Max(accelData3);
+			mapVal.setAccelData1Min(Integer.parseInt(accelData1));
+			mapVal.setAccelData1Max(Integer.parseInt(accelData1));
+			mapVal.setAccelData2Min(Integer.parseInt(accelData2));
+			mapVal.setAccelData2Max(Integer.parseInt(accelData2));
+			mapVal.setAccelData3Min(Integer.parseInt(accelData3));
+			mapVal.setAccelData3Max(Integer.parseInt(accelData3));
 			
 			
 			output.collect(mapKey, mapVal);
