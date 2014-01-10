@@ -43,9 +43,6 @@ public class SlidingWindow {
 	
 	public boolean WindowIsFull() {
 		
-		log.info("WindowDelta: "+this.GetWindowDelta()+" && WindowSize: "+this._lWindowSize);
-		System.out.println("WindowDelta: "+this.GetWindowDelta()+" && WindowSize: "+this._lWindowSize);
-		
 		if ( this.GetWindowDelta() >= this._lWindowSize ) {
 			return true;
 		}
@@ -101,7 +98,7 @@ public class SlidingWindow {
 		while ( this.oCurrentWindow.getFirst().getEventTime() < this._lCurrentTime ) {
 
 			this.oCurrentWindow.removeFirst();
-	
+			
 		}				
 		
 	}	

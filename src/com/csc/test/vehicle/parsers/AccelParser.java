@@ -33,14 +33,6 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 	private Integer accelData3Max;
 
 	
-	public static String getDateFormat() {
-		return DATE_FORMAT;
-	}
-
-	public static SimpleDateFormat getSdf() {
-		return sdf;
-	}
-
 	public String getTripId() {
 		return tripId;
 	}
@@ -71,10 +63,6 @@ public class AccelParser implements Writable, Comparable<AccelParser>{
 
 	public Integer getAccelData3Max() {
 		return accelData3Max;
-	}
-
-	public static void setSdf(SimpleDateFormat sdf) {
-		AccelParser.sdf = sdf;
 	}
 
 	public void setTripId(String tripId) {

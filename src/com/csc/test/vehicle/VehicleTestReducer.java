@@ -1,6 +1,7 @@
 package com.csc.test.vehicle;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -18,6 +19,10 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 	static enum PointCounters {
 		POINTS_SEEN, POINTS_ADDED_TO_WINDOWS, MOVING_AVERAGES_CALCD
 	};
+	
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"; //yyyy-MM-dd HH:mm:ss:SSS
+
+	private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
 	static long sec_in_ms = 1000;
 	
@@ -36,8 +41,8 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 	public void reduce(TimeseriesKey key, Iterator<AccelParser> values,
 			OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
-		float point_sum = 0;
-		float moving_avg = 0;
+		//float point_sum = 0;
+		//float moving_avg = 0;
 				
 		AccelParser next_point = new AccelParser(); 
 				
@@ -62,9 +67,9 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 			
 			while (sliding_window.WindowIsFull() == false && values.hasNext()) {
 				
-				reporter.incrCounter(PointCounters.POINTS_ADDED_TO_WINDOWS, 1);
-
 				next_point = values.next();
+
+				reporter.incrCounter(PointCounters.POINTS_ADDED_TO_WINDOWS, 1);
 
 				AccelParser p_copy = new AccelParser();
 				p_copy.copy(next_point);
@@ -76,7 +81,7 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 				}
 				
 			}
-			if (sliding_window.WindowIsFull()) {
+			if (sliding_window.WindowIsFull() || !values.hasNext()) {
 				
 				reporter.incrCounter(PointCounters.MOVING_AVERAGES_CALCD, 1);
 
@@ -89,13 +94,10 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 
 				String strBackDate = oWindow.getLast().getDate();
 
-				// ---------- compute the moving average here -----------
-
 				out_key.set("Trip_Id: " + key.getTripId() + ", Date: "
 						+ strBackDate + ", oWindow Size: "+oWindow.size());
+				//out_key.set("Trip_Id: " + key.getTripId() + ", Date: " + sdf.format(key.getTimestamp()));
 				
-				point_sum = 0;
-			
 				result.setAccelData1Min(null);
 				result.setAccelData1Max(null);
 				result.setAccelData2Min(null);
@@ -104,8 +106,6 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 				result.setAccelData3Max(null);
 				
 				for (int x = 0; x < oWindow.size(); x++) {
-					
-					//parse = oWindow.get(x);
 					
 					if(result.getAccelData1Min() == null || 
 							oWindow.get(x).getAccelData1Min().compareTo(result.getAccelData1Min()) < 0) {
@@ -131,10 +131,6 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 		                result.setAccelData3Max(oWindow.get(x).getAccelData3Max());
 		            }
 					
-		            //reduceOut = reduceOut.concat(oWindow.get(x).getAccelData1Min()+":");
-
-					//point_sum += Integer.parseInt(oWindow.get(x).getAccelData1Min());
-
 				} // for
 
 				//moving_avg = point_sum / oWindow.size();
@@ -149,14 +145,23 @@ public class VehicleTestReducer extends MapReduceBase implements Reducer<Timeser
 
 				// 2. step window forward
 				
-				sliding_window.SlideWindowForward();
+				//sliding_window.SlideWindowForward();
+				
+				sliding_window = new SlidingWindow(iWindowSizeInMS,iWindowStepSizeInMS, sec_in_ms);
 
 			}
 			
 			
 		}
 		
-		
+		/*String reduceOut = new String();
+		while (values.hasNext()) {			
+			next_point = values.next();		
+			reduceOut = next_point.getAccelData1Min() + ", "+ next_point.getAccelData1Max() + ", " + next_point.getAccelData2Min()
+					+ ", " + next_point.getAccelData2Max() + ", "+ next_point.getAccelData3Min() + ", " + next_point.getAccelData3Max();
+			out_val.set(reduceOut);			
+			output.collect(out_key, out_val);					
+		}*/
 		
 	}
 
